@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      :root {
+        --background-color: #fff;
+        --color:#000;
+        background-color: var(--background-color);
+        color: var(--color);
+      }
+      :root.dark {
+        --background-color: #000;
+        --color:#fff;
+      }
+      ::view-transition-new(root),
+      ::view-transition-old(root) {
+        animation: none;
+        z-index: 1;
+      }
+    .dark::view-transition-old(root){
+        z-index: 2147483646;
+      }
+      :not(.dark)::view-transition-new(root){
+        z-index: 2147483646;
+      }
+      #btn{
+        position: fixed;
+        right: 90px;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="btn">Toggle Theme</button>
+    <div>文字</div>
+  </body>
+  <script>
+    const btn = document.querySelector("#btn");
+    let isDark = document.documentElement.classList.contains('dark')
+    btn.addEventListener("click", (e) => {
+      const transition = document.startViewTransition(() => {
+        document.documentElement.classList.toggle("dark");
+        isDark = document.documentElement.classList.contains('dark')
+      });
+      const [x, y] = [e.clientX, e.clientY];
+      
+      transition.ready.then(() => {
+        const tragetRadius = Math.hypot(
+        Math.max(x,window.innerWidth - x),
+        Math.max(y,window.innerHeight - y)
+      );
+      const clipPath = [
+              `circle(0% at ${x}px ${y}px)`,
+              `circle(${tragetRadius}px at ${x}px ${y}px)`,
+            ]
+        document.documentElement.animate(
+          {
+            clipPath:isDark?clipPath.reverse():clipPath,
+          },
+          {
+            duration: 1000,
+            pseudoElement: isDark?"::view-transition-old(root)":"::view-transition-new(root)",
+
+          }
+        );
+      });
+    });
+  </script>
+</html>
